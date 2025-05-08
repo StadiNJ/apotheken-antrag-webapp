@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="styles.css" />
+  <title>Login Zentrale</title>
+</head>
+<body>
+  <h1>Zentrale Login</h1>
+  <form id="loginForm">
+    <label for="password">Passwort:</label><br />
+    <input type="password" id="password" name="password" required />
+    <p class="demo-passwort-hinweis">🔐 Demo-Passwort: <strong>medbase-demo</strong></p>
+    <button type="submit">Einloggen</button>
+  </form>
+  <p id="msg"></p>
+
+  <script>
+      if (location.hostname !== 'localhost') {
+    document.getElementById('demoHinweis').style.display = 'none';
+  }
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+
+      if (res.ok) {
+        window.location.href = '/zentrale.html';
+      } else {
+        msg.textContent = 'Falsches Passwort';
+      }
+    });
+  </script>
+</body>
+</html>

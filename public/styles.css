@@ -1,0 +1,187 @@
+:root {
+    --medbase-green: #6dc242;
+    --light-grey: #f9f9f9;
+    --light-green: #e6f7e9;
+    --grey: #f8f8f8;
+    --error-red: #e74c3c;
+  }
+  
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background-color: var(--light-grey);
+    margin: 0;
+    padding: 2rem;
+    color: #333;
+  }
+  
+  h1 {
+    color: var(--medbase-green);
+    margin-bottom: 1.5rem;
+  }
+  
+  form {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 1rem;
+  }
+  
+  label {
+    font-weight: bold;
+    margin-top: 1rem;
+    display: block;
+  }
+  
+  input, select {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  button {
+    background-color: var(--medbase-green);
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+  }
+  
+  button:hover {
+    background-color: #5bab39;
+  }
+  
+  .topnav {
+    display: flex;
+    justify-content: flex-end; /* rechtsbündig */
+    margin-bottom: 1.5rem;
+  }
+    
+  .topnav button {
+    background-color: var(--medbase-green);
+    color: white;
+    border: none;
+    padding: 0.4rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .topnav button:hover {
+    background-color: #5bab39;
+  }
+  
+  #responseMsg {
+    font-weight: bold;
+    margin-top: 1rem;
+  }
+  #responseMsg.success {
+    color: var(--medbase-green);
+  }
+  #responseMsg.error {
+    color: var(--error-red);
+  }
+  
+  /* Tabellen-Stile für zentrale.html */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  th, td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  
+  th {
+    background-color: #f0f0f0;
+  }
+  
+  tr.erfasst {
+    background-color: var(--light-green);
+  }
+  
+  @media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+      display: block;
+    }
+    tr {
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 5px;
+    }
+    td {
+      border: none;
+      padding: 0.5rem;
+    }
+    td::before {
+      content: attr(data-label);
+      font-weight: bold;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+  }
+  .demo-passwort-hinweis {
+    color: red;
+    margin-bottom: 1rem;
+  }
+  
+  .artikelGruppe {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  
+  .artikelGruppe > div {
+    flex: 1 1 220px;
+    min-width: 200px;
+  }
+  
+  .artikelGruppe label {
+    margin-top: 0;
+  }
+
+  .antrag-box {
+    background: white;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .antrag-box input {
+    margin-right: 0.5rem;
+    max-width: 300px;
+  }
+  
+  .antrag-box {
+    background: white;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .antrag-eintrag {
+    border-top: 1px solid #ddd;
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  
+  .antrag-eintrag input {
+    margin-right: 0.5rem;
+    max-width: 300px;
+  }
+  
+  

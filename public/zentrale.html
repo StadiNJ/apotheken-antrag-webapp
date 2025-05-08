@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css" />
+  <title>Zentrale – Anträge verwalten</title>
+  <style>
+    .gruppe-box {
+      background: white;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .gruppe-box h3 {
+      margin-bottom: 1rem;
+      color: var(--medbase-green);
+    }
+
+    .antrag-zeile {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      border-top: 1px solid #ddd;
+      padding: 0.5rem 0;
+      align-items: center;
+    }
+
+    .antrag-zeile span {
+      flex: 1 1 120px;
+      cursor: pointer;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    .antrag-zeile span:hover {
+      background-color: #f0f0f0;
+    }
+
+    .aktion {
+      min-width: 100px;
+    }
+  </style>
+</head>
+<body>
+  <div class="topnav">
+    <button onclick="window.location.href='/index.html'">⬅ Zurück zu Antrag</button>
+  </div>
+
+  <h1>Anträge verwalten</h1>
+
+  <div id="gruppenContainer"></div>
+
+  <script>
+    async function ladeAntraege() {
+      const res = await fetch('/api/antrag');
+      const daten = await res.json();
+      const container = document.getElementById('gruppenContainer');
+      container.innerHTML = '';
+
+      // Gruppieren nach Apotheke (email)
+      const gruppiert = daten.reduce((gruppen, eintrag) => {
+        if (!gruppen[eintrag.email]) gruppen[eintrag.email] = [];
+        gruppen[eintrag.email].push(eintrag);
+        return gruppen;
+      }, {});
+
+      for (const email in gruppiert) {
+        const box = document.createElement('div');
+        box.classList.add('gruppe-box');
+
+        const title = document.createElement('h3');
+        title.textContent = `Apotheke: ${email}`;
+        box.appendChild(title);
+
+        gruppiert[email].forEach(antrag => {
+          const zeile = document.createElement('div');
+          zeile.classList.add('antrag-zeile');
+
+          zeile.innerHTML = `
+            <span onclick="copyToClipboard('${antrag.pharmacode}')">Pharmacode: ${antrag.pharmacode}</span>
+            <span onclick="copyToClipboard('${antrag.artikel}')">Artikel: ${antrag.artikel}</span>
+            <span onclick="copyToClipboard('${antrag.mwst}%')">MWST: ${antrag.mwst}%</span>
+            <span onclick="copyToClipboard('CHF ${antrag.preis.toFixed(2)}')">Preis: CHF ${antrag.preis.toFixed(2)}</span>
+            <span onclick="copyToClipboard('${antrag.status}')">Status: ${antrag.status}</span>
+            <span class="aktion">
+              ${antrag.status === 'offen'
+                ? `<button onclick="markiereErfasst(${antrag.id})">✅ Erfassen</button>`
+                : '✔️'}
+            </span>
+          `;
+
+          box.appendChild(zeile);
+        });
+
+        container.appendChild(box);
+      }
+    }
+
+    async function markiereErfasst(id) {
+      const res = await fetch(`/api/antrag/${id}/erfassen`, {
+        method: 'POST'
+      });
+      const text = await res.text();
+      alert(text);
+      ladeAntraege();
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert(`📋 In Zwischenablage kopiert: ${text}`);
+      });
+    }
+
+    ladeAntraege();
+  </script>
+</body>
+</html>

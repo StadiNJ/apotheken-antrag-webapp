@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="styles.css" />
+  <div class="topnav">
+    <button onclick="window.location.href='/login.html'">⟵ Zur Zentrale</button>
+  </div>
+  <title>Apotheken Antrag</title>
+</head>
+<body>
+  <h1>Neuer Artikel-Antrag</h1>
+
+  <form id="antragForm">
+    <div id="artikelContainer">
+      <div class="artikelGruppe">
+        <div>
+          <label for="pharmacode">Pharmacode:</label>
+          <input type="number" name="pharmacode" placeholder="z. B. 123456" required pattern="\d+" />
+        </div>
+        <div>
+          <label for="artikel">Artikelbezeichnung:</label>
+          <input type="text" name="artikel" placeholder="z. B. Ibuprofen 400mg" required />
+        </div>
+        <div>
+          <label for="mwst">Mehrwertsteuer:</label>
+          <select name="mwst" title="Mehrwertsteuer auswählen" required>
+            <option value="2.6">2.6%</option>
+            <option value="8.6">8.1%</option>
+            <option value="0">0%</option>
+          </select>
+        </div>
+        <div>
+          <label for="preis">Einkaufspreis (CHF):</label>
+          <input type="number" name="preis" step="0.01" placeholder="z. B. 5.20" required />
+        </div>
+      </div>
+          </div>
+
+    <label for="email">Mail der Apotheke:</label>
+    <input type="email" name="email" placeholder="apotheke-name@medbase.ch" required />
+
+    <button type="button" onclick="artikelHinzufuegen()">+ Artikel hinzufügen</button>
+    <button type="submit">Antrag senden</button>
+  </form>
+
+  <h2>Bereits eingereichte Anträge</h2>
+<div id="vorhandeneAntraege"></div>
+
+    
+  <p id="responseMsg"></p>
+
+  <script>
+    const form = document.getElementById('antragForm');
+    const msg = document.getElementById('responseMsg');
+    const artikelContainer = document.getElementById('artikelContainer');
+
+    function artikelHinzufuegen() {
+      const gruppe = document.querySelector('.artikelGruppe');
+      const neueGruppe = gruppe.cloneNode(true);
+
+      neueGruppe.querySelectorAll('input').forEach(input => input.value = '');
+      neueGruppe.querySelector('select').value = '2.6';
+
+      artikelContainer.appendChild(neueGruppe);
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      msg.className = '';
+
+      const artikelGruppen = document.querySelectorAll('.artikelGruppe');
+      const email = form.querySelector('input[name="email"]').value;
+
+      const antraege = Array.from(artikelGruppen).map(gruppe => ({
+        pharmacode: gruppe.querySelector('input[name="pharmacode"]').value,
+        artikel: gruppe.querySelector('input[name="artikel"]').value,
+        mwst: parseFloat(gruppe.querySelector('select[name="mwst"]').value),
+        preis: parseFloat(gruppe.querySelector('input[name="preis"]').value),
+        email: email
+      }));
+
+      try {
+        const res = await fetch('/api/antrag/bulk', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email, antraege })
+});
+
+const text = await res.text();
+if (!res.ok) throw new Error(text);
+
+        msg.textContent = '✅ Alle Anträge erfolgreich gesendet!';
+        msg.className = 'success';
+        form.reset();
+        document.querySelectorAll('.artikelGruppe:not(:first-child)').forEach(el => el.remove());
+
+      } catch (err) {
+        msg.textContent = '❌ Fehler beim Senden: ' + err.message;
+        msg.className = 'error';
+      }
+    });
+    async function ladeVorhandeneAntraege() {
+  const res = await fetch('/api/antrag');
+  const daten = await res.json();
+  const container = document.getElementById('vorhandeneAntraege');
+  container.innerHTML = '';
+
+  // Gruppiere nach E-Mail-Adresse
+  const gruppiert = daten.reduce((gruppen, eintrag) => {
+    if (!gruppen[eintrag.email]) gruppen[eintrag.email] = [];
+    gruppen[eintrag.email].push(eintrag);
+    return gruppen;
+  }, {});
+
+  for (const email in gruppiert) {
+    const section = document.createElement('div');
+    section.classList.add('antrag-box');
+
+    const header = document.createElement('h3');
+    header.textContent = `Apotheke: ${email}`;
+    section.appendChild(header);
+
+    gruppiert[email].forEach(a => {
+      const eintragDiv = document.createElement('div');
+      eintragDiv.classList.add('antrag-eintrag');
+
+      eintragDiv.innerHTML = `
+        <p><strong>${a.artikel}</strong> (Pharmacode: ${a.pharmacode})</p>
+        <p>MWST: ${a.mwst}% | Preis: CHF ${a.preis.toFixed(2)}</p>
+        <p>Status: ${a.status}</p>
+        <input type="email" placeholder="Ihre E-Mail für Benachrichtigung" id="email-${a.id}" />
+        <button onclick="interesseMelden(${a.id})">Mich auch benachrichtigen</button>
+      `;
+
+      section.appendChild(eintragDiv);
+    });
+
+    container.appendChild(section);
+  }
+}
+
+async function interesseMelden(id) {
+  const email = document.getElementById(`email-${id}`).value;
+  if (!email || !email.includes('@')) return alert('Bitte gültige E-Mail angeben');
+
+  const res = await fetch('/api/antrag/interesse', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ antrag_id: id, email })
+  });
+
+  const msg = await res.text();
+  alert(msg);
+}
+
+ladeVorhandeneAntraege();
+
+  </script>
+</body>
+</html>
